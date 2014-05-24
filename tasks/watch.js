@@ -8,6 +8,7 @@ module.exports = function(grunt) {
   var path = require('path');
   var tinylr = require('tiny-lr-fork');
   var semver = require('semver');
+  var chokidar = require('chokidar');
 
   var RESTART_WATCHERS_DEBOUNCE = 10;
   var WAIT_FOR_UNLOCK_INTERVAL = 10;
@@ -184,9 +185,11 @@ module.exports = function(grunt) {
 
   var watchDirs = function(dirs) {
     dirs.forEach(function(dir) {
-      var watcher = fs.watch(dir, function(event, filename) {
-        onDirChange(event, filename, dir);
-      });
+       var watcher = chokidar.watch(dir, {ignored: /[\/\\]\./ , ignoreInitial: true})
+       watcher.on('all', function(event, filepath, stats) {
+         var filename = path.basename(filepath)
+         onDirChange(event, filename, dir);
+       });
       watchers.push(watcher);
     });
   };
